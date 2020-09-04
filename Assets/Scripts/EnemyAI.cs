@@ -3,7 +3,7 @@ using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
 {
-    [Tooltip("Player Position")] [SerializeField] Transform target;
+    [Tooltip("Player Position")] [SerializeField] Transform target = null;
     [Tooltip("Meters")] [SerializeField] float chaseRange = 5f;
 
     NavMeshAgent navMeshAgent;

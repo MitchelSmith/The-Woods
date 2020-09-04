@@ -1,26 +1,38 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 public class WeaponController : MonoBehaviour
 {
     [Header("General")]
-    [SerializeField] Camera FPCamera;
-    [SerializeField] float range = 100f;
+    [Tooltip("First Person Camera")] [SerializeField] Camera FPCamera = null;
+    [Tooltip("Meters")] [SerializeField] float range = 100f;
+    [SerializeField] float damage = 10f;
+    [SerializeField] GameObject hitEffect;
 
     [Header("Weapon Animation Parameters")]
-    [SerializeField] Transform parent;
-    [SerializeField] GameObject casingPrefab;
-    [SerializeField] GameObject muzzleFlashPrefab;
-    [SerializeField] Transform barrelLocation;
-    [SerializeField] Transform casingExitLocation;
+    [SerializeField] string animationName = null;
+    [SerializeField] float animationSpeed = 1f;
+    [SerializeField] Transform casingParent = null;
+    [SerializeField] GameObject casingPrefab = null;
+    [SerializeField] Transform barrelLocation = null;
+    [SerializeField] Transform casingExitLocation = null;
+    [SerializeField] ParticleSystem muzzleFlash = null;
+
+    private Animator animator;
 
     void Start()
     {
         if (barrelLocation == null)
             barrelLocation = transform;
+
+        animator = GetComponent<Animator>();
     }
 
     void Update()
     {
+        // Do not shoot if animation is still playing
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName(animationName)) { return; }
+
         if (Input.GetButtonDown("Fire1"))
         {
             ShootWeapon();
@@ -29,27 +41,33 @@ public class WeaponController : MonoBehaviour
 
     private void ShootWeapon()
     {
-        StartAnimation();
+        PlayMuzzleFlash();
+        ProcessRaycast();
+    }
 
+    private void ProcessRaycast()
+    {
         RaycastHit hit;
-        Physics.Raycast(FPCamera.transform.position, FPCamera.transform.forward, out hit);
-        print(hit.transform.name);
+
+        if (Physics.Raycast(FPCamera.transform.position, FPCamera.transform.forward, out hit, range))
+        {
+            CreateHitImpact(hit);
+            EnemyHealth target = hit.transform.GetComponent<EnemyHealth>();
+            target?.ReceiveDamage(damage);
+        }
     }
 
-    private void StartAnimation()
+    private void CreateHitImpact(RaycastHit hit)
     {
-        GetComponent<Animator>().speed = 2f;
-        GetComponent<Animator>().SetTrigger("Fire");
+        GameObject impact = Instantiate(hitEffect, hit.point, Quaternion.LookRotation(hit.normal));
+        Destroy(impact, 1f);
     }
 
-    /// <summary>
-    /// Triggered by firing animation
-    /// </summary>
-    void Shoot()
+    private void PlayMuzzleFlash()
     {
-        GameObject muzzleFlash;
-        muzzleFlash = Instantiate(muzzleFlashPrefab, barrelLocation.position, barrelLocation.rotation);
-        muzzleFlash.transform.parent = parent;
+        muzzleFlash.Play();
+        animator.speed = animationSpeed;
+        animator.SetTrigger("Fire");
     }
 
     /// <summary>
@@ -58,13 +76,13 @@ public class WeaponController : MonoBehaviour
     void CasingRelease()
     {
         GameObject casing = Instantiate(casingPrefab, casingExitLocation.position, casingExitLocation.rotation);
-        casing.transform.parent = parent;
+        casing.transform.parent = casingParent;
 
         Rigidbody casingRigidBody = casing.GetComponent<Rigidbody>();
 
         casingRigidBody.isKinematic = false;
         casingRigidBody.useGravity = true;
-        casingRigidBody.AddExplosionForce(550f, (casingExitLocation.position - casingExitLocation.right * 0.3f - casingExitLocation.up * 0.6f), 1f);
+        casingRigidBody.AddExplosionForce(550f, (casingExitLocation.position - casingExitLocation.right * Random.Range(0.35f, 0.45f) - casingExitLocation.up * Random.Range(0.55f, 0.65f)), 1f);
         casingRigidBody.AddTorque(new Vector3(0, Random.Range(100f, 500f), Random.Range(10f, 1000f)), ForceMode.Impulse);
 
         Destroy(casing, 10f);
