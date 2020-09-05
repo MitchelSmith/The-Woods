@@ -7,7 +7,7 @@ public class WeaponController : MonoBehaviour
     [Tooltip("First Person Camera")] [SerializeField] Camera FPCamera = null;
     [Tooltip("Meters")] [SerializeField] float range = 100f;
     [SerializeField] float damage = 10f;
-    [SerializeField] GameObject hitEffect;
+    [SerializeField] GameObject hitEffect = null;
 
     [Header("Weapon Animation Parameters")]
     [SerializeField] string animationName = null;
