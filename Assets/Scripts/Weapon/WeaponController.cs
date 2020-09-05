@@ -8,6 +8,7 @@ public class WeaponController : MonoBehaviour
     [Tooltip("Meters")] [SerializeField] float range = 100f;
     [SerializeField] float damage = 10f;
     [SerializeField] GameObject hitEffect = null;
+    [SerializeField] Ammo ammoSlot = null;
 
     [Header("Weapon Animation Parameters")]
     [SerializeField] string animationName = null;
@@ -35,7 +36,14 @@ public class WeaponController : MonoBehaviour
 
         if (Input.GetButtonDown("Fire1"))
         {
-            ShootWeapon();
+            if (ammoSlot.GetCurrentAmmo() > 0)
+            {
+                ShootWeapon();
+            }
+            else
+            {
+                // TODO: Make trigger clicking noise, animate pistol hammer
+            }
         }
     }
 
@@ -43,6 +51,7 @@ public class WeaponController : MonoBehaviour
     {
         PlayMuzzleFlash();
         ProcessRaycast();
+        ammoSlot.ReduceCurrentAmmo();
     }
 
     private void ProcessRaycast()
