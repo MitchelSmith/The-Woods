@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class WeaponController : MonoBehaviour
 {
@@ -9,6 +8,7 @@ public class WeaponController : MonoBehaviour
     [SerializeField] float damage = 10f;
     [SerializeField] GameObject hitEffect = null;
     [SerializeField] Ammo ammoSlot = null;
+    [SerializeField] AmmoType ammoType = default;
 
     [Header("Weapon Animation Parameters")]
     [SerializeField] string animationName = null;
@@ -36,7 +36,7 @@ public class WeaponController : MonoBehaviour
 
         if (Input.GetButtonDown("Fire1"))
         {
-            if (ammoSlot.GetCurrentAmmo() > 0)
+            if (ammoSlot.GetCurrentAmmo(ammoType) > 0)
             {
                 ShootWeapon();
             }
@@ -51,7 +51,7 @@ public class WeaponController : MonoBehaviour
     {
         PlayMuzzleFlash();
         ProcessRaycast();
-        ammoSlot.ReduceCurrentAmmo();
+        ammoSlot.ReduceCurrentAmmo(ammoType);
     }
 
     private void ProcessRaycast()

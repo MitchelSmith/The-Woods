@@ -9,7 +9,7 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField] Image pickupIcon = null;
     [SerializeField] Image noteIcon = null;
 
-    int layerMask = 0;
+    private int layerMask = 0;
 
     void Start()
     {
@@ -40,9 +40,15 @@ public class PlayerInteraction : MonoBehaviour
 
     private void ProcessInteraction(RaycastHit hit)
     {
-        if (hit.transform.tag == "Ammo")
+        switch (hit.transform.tag)
         {
-            pickupIcon.enabled = true;
+            case "Ammo":
+                InteractWithAmmo(hit);
+                break;
+            case "Note":
+                noteIcon.enabled = true;
+                // Handle clicking on note
+                break;
         }
     }
 
@@ -50,5 +56,17 @@ public class PlayerInteraction : MonoBehaviour
     {
         pickupIcon.enabled = false;
         noteIcon.enabled = false;
+    }
+
+    private void InteractWithAmmo(RaycastHit hit)
+    {
+        pickupIcon.enabled = true;
+
+        if (Input.GetButtonDown("Interact"))
+        {
+            AmmoPickup ammo = hit.transform.GetComponent<AmmoPickup>();
+            FindObjectOfType<Ammo>().IncreaseCurrentAmmo(ammo.type, ammo.amount);
+            Destroy(ammo.gameObject);
+        }
     }
 }
