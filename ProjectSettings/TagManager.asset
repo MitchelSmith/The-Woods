@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Ammo
   - Note
+  - Flashlight
   layers:
   - Default
   - TransparentFX

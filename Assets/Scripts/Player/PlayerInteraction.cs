@@ -43,7 +43,8 @@ public class PlayerInteraction : MonoBehaviour
         switch (hit.transform.tag)
         {
             case "Ammo":
-                InteractWithAmmo(hit);
+            case "Flashlight":
+                InteractWithObject(hit);
                 break;
             case "Note":
                 noteIcon.enabled = true;
@@ -58,15 +59,36 @@ public class PlayerInteraction : MonoBehaviour
         noteIcon.enabled = false;
     }
 
-    private void InteractWithAmmo(RaycastHit hit)
+    private void InteractWithObject(RaycastHit hit)
     {
         pickupIcon.enabled = true;
 
         if (Input.GetButtonDown("Interact"))
         {
-            AmmoPickup ammo = hit.transform.GetComponent<AmmoPickup>();
-            FindObjectOfType<Ammo>().IncreaseCurrentAmmo(ammo.type, ammo.amount);
-            Destroy(ammo.gameObject);
+            switch (hit.transform.tag)
+            {
+                case "Ammo":
+                    InteractWithAmmo(hit);
+                    break;
+                case "Flashlight":
+                    InteractWithFlashlight(hit);
+                    break;
+            }
         }
+    }
+
+    private void InteractWithAmmo(RaycastHit hit)
+    {
+        AmmoPickup ammo = hit.transform.GetComponent<AmmoPickup>();
+        FindObjectOfType<Ammo>().IncreaseCurrentAmmo(ammo.type, ammo.amount);
+        Destroy(ammo.gameObject);
+    }
+
+    private void InteractWithFlashlight(RaycastHit hit)
+    {
+        GameObject flashlight = hit.transform.gameObject;
+        FlashlightSystem flashlightSystem = transform.GetComponent<FlashlightSystem>();
+        flashlightSystem.PickupFlashlight();
+        Destroy(flashlight);
     }
 }
