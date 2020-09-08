@@ -4,6 +4,7 @@ public class FlashlightSystem : MonoBehaviour
 {
     [SerializeField] GameObject flashlight = null;
     [SerializeField] bool flashlightOn = false;
+    [SerializeField] AudioClip flashlightClick = null;
     private bool hasFlashlight = false;
 
     void Start()
@@ -36,6 +37,7 @@ public class FlashlightSystem : MonoBehaviour
     public void ToggleFlashlight()
     {
         flashlightOn = !flashlightOn;
+        GetComponent<AudioSource>().PlayOneShot(flashlightClick);
 
         foreach (Transform child in flashlight.transform)
         {

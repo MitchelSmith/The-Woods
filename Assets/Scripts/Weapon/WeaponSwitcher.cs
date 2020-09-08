@@ -4,6 +4,8 @@ using UnityEngine;
 public class WeaponSwitcher : MonoBehaviour
 {
     [SerializeField] int currentWeapon = 0;
+    [SerializeField] AudioClip holsterWeapon = null;
+    [SerializeField] AudioClip unholsterWeapon = null;
 
     void Start()
     {
@@ -74,6 +76,16 @@ public class WeaponSwitcher : MonoBehaviour
             if (weaponIndex == currentWeapon)
             {
                 weapon.gameObject.SetActive(true);
+                
+                // Change if any weapons added
+                if (weapon.gameObject.name == "Pistol")
+                {
+                    GetComponent<AudioSource>().PlayOneShot(unholsterWeapon);
+                }
+                else
+                {
+                    GetComponent<AudioSource>().PlayOneShot(holsterWeapon);
+                }
             }
             else
             {

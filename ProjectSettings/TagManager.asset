@@ -7,6 +7,7 @@ TagManager:
   - Ammo
   - Note
   - Flashlight
+  - Radio
   layers:
   - Default
   - TransparentFX

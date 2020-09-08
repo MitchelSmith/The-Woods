@@ -4,13 +4,15 @@ public class WeaponController : MonoBehaviour
 {
     [Header("General")]
     [Tooltip("First Person Camera")] [SerializeField] Camera FPCamera = null;
+
+    [Header("Weapon Parameters")]
     [Tooltip("Meters")] [SerializeField] float range = 100f;
     [SerializeField] float damage = 10f;
     [SerializeField] GameObject hitEffect = null;
     [SerializeField] Ammo ammoSlot = null;
     [SerializeField] AmmoType ammoType = default;
 
-    [Header("Weapon Animation Parameters")]
+    [Header("Animation Parameters")]
     [SerializeField] string animationName = null;
     [SerializeField] float animationSpeed = 1f;
     [SerializeField] Transform casingParent = null;
@@ -18,6 +20,11 @@ public class WeaponController : MonoBehaviour
     [SerializeField] Transform barrelLocation = null;
     [SerializeField] Transform casingExitLocation = null;
     [SerializeField] ParticleSystem muzzleFlash = null;
+
+    [Header("Audio")]
+    [SerializeField] AudioClip pistolShot = null;
+    [SerializeField] AudioClip pistolReload = null;
+    [SerializeField] AudioClip dryFire = null;
 
     private Animator animator;
 
@@ -42,13 +49,16 @@ public class WeaponController : MonoBehaviour
             }
             else
             {
-                // TODO: Make trigger clicking noise, animate pistol hammer
+                animator.speed = 2f;
+                animator.SetTrigger("DryFire");
             }
         }
     }
 
     private void ShootWeapon()
     {
+        // TODO: Fix gun shot audio being cut off by holstering
+        GetComponent<AudioSource>().PlayOneShot(pistolShot);
         PlayMuzzleFlash();
         ProcessRaycast();
         ammoSlot.ReduceCurrentAmmo(ammoType);
@@ -95,5 +105,13 @@ public class WeaponController : MonoBehaviour
         casingRigidBody.AddTorque(new Vector3(0, Random.Range(100f, 500f), Random.Range(10f, 1000f)), ForceMode.Impulse);
 
         Destroy(casing, 10f);
+    }
+
+    /// <summary>
+    /// Trigger by dry fire animation
+    /// </summary>
+    void DryFireWeapon()
+    {
+        GetComponent<AudioSource>().PlayOneShot(dryFire);
     }
 }
