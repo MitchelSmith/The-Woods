@@ -8,6 +8,7 @@ TagManager:
   - Note
   - Flashlight
   - Radio
+  - Weapon
   layers:
   - Default
   - TransparentFX

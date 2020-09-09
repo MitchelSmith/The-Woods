@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class WeaponController : MonoBehaviour
 {
@@ -13,17 +14,18 @@ public class WeaponController : MonoBehaviour
     [SerializeField] AmmoType ammoType = default;
 
     [Header("Animation Parameters")]
-    [SerializeField] string animationName = null;
+    [SerializeField] string shootingAnimationName = null;
     [SerializeField] float animationSpeed = 1f;
-    [SerializeField] Transform casingParent = null;
+    [SerializeField] Transform destroyParent = null;
     [SerializeField] GameObject casingPrefab = null;
     [SerializeField] Transform barrelLocation = null;
     [SerializeField] Transform casingExitLocation = null;
     [SerializeField] ParticleSystem muzzleFlash = null;
 
     [Header("Audio")]
+    [SerializeField] AudioSource generalAudio = null;
+    [SerializeField] AudioSource reloadAudio = null;
     [SerializeField] AudioClip pistolShot = null;
-    [SerializeField] AudioClip pistolReload = null;
     [SerializeField] AudioClip dryFire = null;
 
     private Animator animator;
@@ -39,11 +41,13 @@ public class WeaponController : MonoBehaviour
     void Update()
     {
         // Do not shoot if animation is still playing
-        if (animator.GetCurrentAnimatorStateInfo(0).IsName(animationName)) { return; }
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName(shootingAnimationName) || reloadAudio.isPlaying) { return; }
+
+        bool hasAmmo = ammoSlot.GetCurrentAmmo(ammoType) > 0;
 
         if (Input.GetButtonDown("Fire1"))
         {
-            if (ammoSlot.GetCurrentAmmo(ammoType) > 0)
+            if (hasAmmo && ammoSlot.GetCurrentRoundsInMagazine(ammoType) > 0)
             {
                 ShootWeapon();
             }
@@ -53,15 +57,30 @@ public class WeaponController : MonoBehaviour
                 animator.SetTrigger("DryFire");
             }
         }
+        else if (Input.GetButtonDown("Reload"))
+        {
+            if (hasAmmo && ammoSlot.GetCurrentRoundsInMagazine(ammoType) < ammoSlot.GetMaxRoundsInMagazine(ammoType))
+            {
+                ReloadWeapon();
+            }
+        }
     }
 
     private void ShootWeapon()
     {
         // TODO: Fix gun shot audio being cut off by holstering
-        GetComponent<AudioSource>().PlayOneShot(pistolShot);
+        generalAudio.PlayOneShot(pistolShot);
         PlayMuzzleFlash();
         ProcessRaycast();
         ammoSlot.ReduceCurrentAmmo(ammoType);
+        ammoSlot.ReduceCurrentRoundsInMagazine(ammoType);
+    }
+
+    private void ReloadWeapon()
+    {
+        // TODO: Add reload animation
+        reloadAudio.Play();
+        ammoSlot.ReloadWeapon(ammoType);
     }
 
     private void ProcessRaycast()
@@ -95,7 +114,7 @@ public class WeaponController : MonoBehaviour
     void CasingRelease()
     {
         GameObject casing = Instantiate(casingPrefab, casingExitLocation.position, casingExitLocation.rotation);
-        casing.transform.parent = casingParent;
+        casing.transform.parent = destroyParent;
 
         Rigidbody casingRigidBody = casing.GetComponent<Rigidbody>();
 
@@ -112,6 +131,6 @@ public class WeaponController : MonoBehaviour
     /// </summary>
     void DryFireWeapon()
     {
-        GetComponent<AudioSource>().PlayOneShot(dryFire);
+        generalAudio.PlayOneShot(dryFire);
     }
 }

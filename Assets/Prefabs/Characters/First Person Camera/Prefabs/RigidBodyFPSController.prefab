@@ -322,7 +322,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ammoSlots:
   - ammoType: 0
-    ammoAmount: 10
+    ammoAmount: 0
+    magazineSize: 7
 --- !u!114 &1866853693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -365,6 +366,7 @@ MonoBehaviour:
   range: 4
   pickupIcon: {fileID: 0}
   noteIcon: {fileID: 0}
+  generalIcon: {fileID: 0}
 --- !u!114 &1866853699
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1095,6 +1097,10 @@ PrefabInstance:
     - target: {fileID: 1267841715524440, guid: 3a041205f62419f439a714f534390f0d, type: 3}
       propertyPath: m_Name
       value: Pistol
+      objectReference: {fileID: 0}
+    - target: {fileID: 1267841715524440, guid: 3a041205f62419f439a714f534390f0d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4042899262355950, guid: 3a041205f62419f439a714f534390f0d, type: 3}
       propertyPath: m_LocalPosition.x

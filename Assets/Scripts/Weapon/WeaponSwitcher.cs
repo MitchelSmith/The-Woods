@@ -7,6 +7,8 @@ public class WeaponSwitcher : MonoBehaviour
     [SerializeField] AudioClip holsterWeapon = null;
     [SerializeField] AudioClip unholsterWeapon = null;
 
+    public bool hasPistol = false;
+
     void Start()
     {
         SetWeaponActive();
@@ -15,14 +17,18 @@ public class WeaponSwitcher : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        int previousWeapon = currentWeapon;
-
-        ProcessKeyInput();
-        ProcessScrollWheel();
-
-        if (previousWeapon != currentWeapon)
+        // Will need to be changed if more weapons added
+        if (hasPistol)
         {
-            SetWeaponActive();
+            int previousWeapon = currentWeapon;
+
+            ProcessKeyInput();
+            ProcessScrollWheel();
+
+            if (previousWeapon != currentWeapon)
+            {
+                SetWeaponActive();
+            }
         }
     }
 
@@ -78,13 +84,16 @@ public class WeaponSwitcher : MonoBehaviour
                 weapon.gameObject.SetActive(true);
                 
                 // Change if any weapons added
-                if (weapon.gameObject.name == "Pistol")
+                if (hasPistol)
                 {
-                    GetComponent<AudioSource>().PlayOneShot(unholsterWeapon);
-                }
-                else
-                {
-                    GetComponent<AudioSource>().PlayOneShot(holsterWeapon);
+                    if (weapon.gameObject.name == "Pistol")
+                    {
+                        GetComponent<AudioSource>().PlayOneShot(unholsterWeapon);
+                    }
+                    else
+                    {
+                        GetComponent<AudioSource>().PlayOneShot(holsterWeapon);
+                    }
                 }
             }
             else

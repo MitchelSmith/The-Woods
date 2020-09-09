@@ -8,6 +8,7 @@ public class PlayerInteraction : MonoBehaviour
 
     [SerializeField] Image pickupIcon = null;
     [SerializeField] Image noteIcon = null;
+    [SerializeField] Image generalIcon = null;
 
     private int layerMask = 0;
 
@@ -27,7 +28,8 @@ public class PlayerInteraction : MonoBehaviour
     private void ProcessRaycast()
     {
         RaycastHit hit;
-
+        
+        // Only handle looking at interactable objects
         if (Physics.Raycast(FPCamera.transform.position, FPCamera.transform.forward, out hit, range, layerMask))
         {
             ProcessInteraction(hit);
@@ -44,7 +46,11 @@ public class PlayerInteraction : MonoBehaviour
         {
             case "Ammo":
             case "Flashlight":
-                InteractWithObject(hit);
+            case "Weapon":
+                InteractWithCollectableObject(hit);
+                break;
+            case "Radio":
+                InteractWithGeneralObject(hit);
                 break;
             case "Note":
                 noteIcon.enabled = true;
@@ -57,10 +63,13 @@ public class PlayerInteraction : MonoBehaviour
     {
         pickupIcon.enabled = false;
         noteIcon.enabled = false;
+        generalIcon.enabled = false;
     }
 
-    private void InteractWithObject(RaycastHit hit)
+    private void InteractWithCollectableObject(RaycastHit hit)
     {
+        // Ensures only one icon showing at a time
+        HideIcons();
         pickupIcon.enabled = true;
 
         if (Input.GetButtonDown("Interact"))
@@ -72,6 +81,9 @@ public class PlayerInteraction : MonoBehaviour
                     break;
                 case "Flashlight":
                     InteractWithFlashlight(hit);
+                    break;
+                case "Weapon":
+                    InteractWithWeapon(hit);
                     break;
             }
         }
@@ -90,5 +102,40 @@ public class PlayerInteraction : MonoBehaviour
         FlashlightSystem flashlightSystem = transform.GetComponent<FlashlightSystem>();
         flashlightSystem.PickupFlashlight();
         Destroy(flashlight);
+    }
+
+    private void InteractWithWeapon(RaycastHit hit)
+    {
+        GameObject weapon = hit.transform.gameObject;
+        GetComponentInChildren<WeaponSwitcher>().hasPistol = true;
+        Destroy(weapon);
+    }
+
+    private void InteractWithGeneralObject(RaycastHit hit)
+    {
+        // Ensures only one icon showing at a time
+        HideIcons();
+        generalIcon.enabled = true;
+
+        if (Input.GetButtonDown("Interact"))
+        {
+            switch (hit.transform.tag)
+            {
+                case "Radio":
+                    InteractWithRadio(hit);
+                    break;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Mutes the radio
+    /// </summary>
+    /// <param name="hit"></param>
+    private void InteractWithRadio(RaycastHit hit)
+    {
+        GameObject radio = hit.transform.gameObject;
+        AudioSource audio = radio.GetComponent<AudioSource>();
+        audio.mute = !audio.mute;
     }
 }
