@@ -3,6 +3,7 @@
 public class EnemyHealth : MonoBehaviour
 {
     [SerializeField] float hitPoints = 100f;
+    [SerializeField] AudioClip zombieDeathSound = null;
 
     bool isDead = false;
 
@@ -30,6 +31,7 @@ public class EnemyHealth : MonoBehaviour
         if (!isDead)
         {
             GetComponent<Animator>().SetTrigger("Die");
+            GetComponent<AudioSource>().PlayOneShot(zombieDeathSound);
         }
 
         isDead = true;

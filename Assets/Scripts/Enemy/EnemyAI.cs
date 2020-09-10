@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
@@ -6,6 +7,7 @@ public class EnemyAI : MonoBehaviour
     [Tooltip("Player Position")] [SerializeField] Transform target = null;
     [Tooltip("Meters")] [SerializeField] float chaseRange = 5f;
     [SerializeField] float turnSpeed = 5f;
+    [SerializeField] AudioClip[] idleZombieSounds = null;
 
     NavMeshAgent navMeshAgent;
     float distanceToTarget = Mathf.Infinity;
@@ -16,6 +18,8 @@ public class EnemyAI : MonoBehaviour
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         health = GetComponent<EnemyHealth>();
+
+        StartCoroutine(PlayRandomIdleSound());
     }
 
     void Update()
@@ -78,6 +82,20 @@ public class EnemyAI : MonoBehaviour
         Vector3 direction = (target.position - transform.position).normalized;
         Quaternion lookRotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.z));
         transform.rotation = Quaternion.Slerp(transform.rotation, lookRotation, Time.deltaTime * turnSpeed);
+    }
+
+    private IEnumerator PlayRandomIdleSound()
+    {
+        yield return new WaitForSeconds(Random.Range(5f, 10f));
+        
+        if (!isProvoked)
+        {
+            int audioClipIndex = Random.Range(0, idleZombieSounds.Length);
+            GetComponent<AudioSource>().PlayOneShot(idleZombieSounds[audioClipIndex], 1f);
+
+            yield return new WaitForSeconds(idleZombieSounds[audioClipIndex].length);
+            StartCoroutine(PlayRandomIdleSound());
+        }
     }
 
     void OnDrawGizmosSelected()
