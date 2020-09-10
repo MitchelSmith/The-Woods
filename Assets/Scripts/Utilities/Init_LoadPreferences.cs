@@ -10,33 +10,31 @@ namespace SpeedTutorMainMenuSystem
         #region Variables
         //BRIGHTNESS
         [Space(20)]
-        [SerializeField] private Brightness brightnessEffect;
-        [SerializeField] private Text brightnessText;
-        [SerializeField] private Slider brightnessSlider;
+        [SerializeField] private Brightness brightnessEffect = null;
+        [SerializeField] private Text brightnessText = null;
+        [SerializeField] private Slider brightnessSlider = null;
 
         //VOLUME
         [Space(20)]
-        [SerializeField] private Text volumeText;
-        [SerializeField] private Slider volumeSlider;
+        [SerializeField] private Text volumeText = null;
+        [SerializeField] private Slider volumeSlider = null;
 
         //SENSITIVITY
         [Space(20)]
-        [SerializeField] private Text controllerText;
-        [SerializeField] private Slider controllerSlider;
+        [SerializeField] private Text controllerText = null;
+        [SerializeField] private Slider controllerSlider = null;
 
         //INVERT Y
         [Space(20)]
-        [SerializeField] private Toggle invertYToggle;
+        [SerializeField] private Toggle invertYToggle = null;
 
         [Space(20)]
         [SerializeField] private bool canUse = false;
-        [SerializeField] private MenuController menuController;
+        [SerializeField] private MenuController menuController = null;
         #endregion
 
         private void Awake()
         {
-            Debug.Log("Loading player prefs test");
-
             if (canUse)
             {
                 //BRIGHTNESS

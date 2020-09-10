@@ -11,10 +11,9 @@ namespace SpeedTutorMainMenuSystem
     {
         #region Default Values
         [Header("Default Menu Values")]
-        [SerializeField] private float defaultBrightness;
-        [SerializeField] private float defaultVolume;
-        [SerializeField] private int defaultSen;
-        [SerializeField] private bool defaultInvertY;
+        [SerializeField] private float defaultBrightness = 1f;
+        [SerializeField] private float defaultVolume = 0.5f;
+        [SerializeField] private int defaultSen = 4;
 
         [Header("Levels To Load")]
         public string _newGameButtonLevel;
@@ -25,55 +24,65 @@ namespace SpeedTutorMainMenuSystem
 
         #region Menu Dialogs
         [Header("Main Menu Components")]
-        [SerializeField] private GameObject menuDefaultCanvas;
-        [SerializeField] private GameObject GeneralSettingsCanvas;
-        [SerializeField] private GameObject graphicsMenu;
-        [SerializeField] private GameObject soundMenu;
-        [SerializeField] private GameObject gameplayMenu;
-        [SerializeField] private GameObject controlsMenu;
-        [SerializeField] private GameObject confirmationMenu;
+        [SerializeField] private GameObject menuDefaultCanvas = null;
+        [SerializeField] private GameObject GeneralSettingsCanvas = null;
+        [SerializeField] private GameObject graphicsMenu = null;
+        [SerializeField] private GameObject soundMenu = null;
+        [SerializeField] private GameObject gameplayMenu = null;
+        [SerializeField] private GameObject controlsMenu = null;
         [Space(10)]
         [Header("Menu Popout Dialogs")]
-        [SerializeField] private GameObject noSaveDialog;
-        [SerializeField] private GameObject newGameDialog;
-        [SerializeField] private GameObject loadGameDialog;
+        [SerializeField] private GameObject noSaveDialog = null;
+        [SerializeField] private GameObject newGameDialog = null;
+        [SerializeField] private GameObject loadGameDialog = null;
         #endregion
 
         #region Slider Linking
         [Header("Menu Sliders")]
-        [SerializeField] private Text controllerSenText;
-        [SerializeField] private Slider controllerSenSlider;
+        [SerializeField] private Text controllerSenText = null;
+        [SerializeField] private Slider controllerSenSlider = null;
         public float controlSenFloat = 2f;
         [Space(10)]
-        [SerializeField] private Brightness brightnessEffect;
-        [SerializeField] private Slider brightnessSlider;
-        [SerializeField] private Text brightnessText;
+        [SerializeField] private Brightness brightnessEffect = null;
+        [SerializeField] private Slider brightnessSlider = null;
+        [SerializeField] private Text brightnessText = null;
         [Space(10)]
-        [SerializeField] private Text volumeText;
-        [SerializeField] private Slider volumeSlider;
+        [SerializeField] private Text volumeText = null;
+        [SerializeField] private Slider volumeSlider = null;
         [Space(10)]
-        [SerializeField] private Toggle invertYToggle;
+        [SerializeField] private Toggle invertYToggle = null;
         #endregion
 
         #region Initialisation - Button Selection & Menu Order
         private void Start()
         {
             menuNumber = 1;
+            
+            if (GetComponent<Canvas>() != null)
+            {
+                GetComponent<Canvas>().enabled = false;
+            }
         }
         #endregion
-
-        //MAIN SECTION
-        public IEnumerator ConfirmationBox()
-        {
-            confirmationMenu.SetActive(true);
-            yield return new WaitForSeconds(2);
-            confirmationMenu.SetActive(false);
-        }
 
         private void Update()
         {
             if (Input.GetKeyDown(KeyCode.Escape))
             {
+                // For pause menu in-game
+                if (SceneManager.GetActiveScene().name != "MainMenu" && Time.timeScale == 1)
+                {
+                    FindObjectOfType<WeaponSwitcher>().enabled = false;
+                    Time.timeScale = 0;
+                    Cursor.lockState = CursorLockMode.None;
+                    Cursor.visible = true;
+                    GetComponent<Canvas>().enabled = true;
+                }
+                else if (SceneManager.GetActiveScene().name != "MainMenu" && Time.timeScale == 0)
+                {
+                    ResumeGame();
+                }
+
                 if (menuNumber == 2 || menuNumber == 7 || menuNumber == 8)
                 {
                     GoBackToMainMenu();
@@ -102,59 +111,57 @@ namespace SpeedTutorMainMenuSystem
         #region Menu Mouse Clicks
         public void MouseClick(string buttonType)
         {
-            if (buttonType == "Controls")
+            switch(buttonType)
             {
-                gameplayMenu.SetActive(false);
-                controlsMenu.SetActive(true);
-                menuNumber = 6;
-            }
+                case "Controls":
+                    gameplayMenu.SetActive(false);
+                    controlsMenu.SetActive(true);
+                    menuNumber = 6;
+                    break;
 
-            if (buttonType == "Graphics")
-            {
-                GeneralSettingsCanvas.SetActive(false);
-                graphicsMenu.SetActive(true);
-                menuNumber = 3;
-            }
+                case "Graphics":
+                    GeneralSettingsCanvas.SetActive(false);
+                    graphicsMenu.SetActive(true);
+                    menuNumber = 3;
+                    break;
 
-            if (buttonType == "Sound")
-            {
-                GeneralSettingsCanvas.SetActive(false);
-                soundMenu.SetActive(true);
-                menuNumber = 4;
-            }
+                case "Sound":
+                    GeneralSettingsCanvas.SetActive(false);
+                    soundMenu.SetActive(true);
+                    menuNumber = 4;
+                    break;
 
-            if (buttonType == "Gameplay")
-            {
-                GeneralSettingsCanvas.SetActive(false);
-                gameplayMenu.SetActive(true);
-                menuNumber = 5;
-            }
+                case "Gameplay":
+                    GeneralSettingsCanvas.SetActive(false);
+                    gameplayMenu.SetActive(true);
+                    menuNumber = 5;
+                    break;
 
-            if (buttonType == "Exit")
-            {
-                Debug.Log("YES QUIT!");
-                Application.Quit();
-            }
+                case "Exit":
+                    Application.Quit();
+                    break;
 
-            if (buttonType == "Options")
-            {
-                menuDefaultCanvas.SetActive(false);
-                GeneralSettingsCanvas.SetActive(true);
-                menuNumber = 2;
-            }
+                case "Options":
+                    menuDefaultCanvas.SetActive(false);
+                    GeneralSettingsCanvas.SetActive(true);
+                    menuNumber = 2;
+                    break;
 
-            if (buttonType == "LoadGame")
-            {
-                menuDefaultCanvas.SetActive(false);
-                loadGameDialog.SetActive(true);
-                menuNumber = 8;
-            }
+                case "LoadGame":
+                    menuDefaultCanvas.SetActive(false);
+                    loadGameDialog.SetActive(true);
+                    menuNumber = 8;
+                    break;
 
-            if (buttonType == "NewGame")
-            {
-                menuDefaultCanvas.SetActive(false);
-                newGameDialog.SetActive(true);
-                menuNumber = 7;
+                case "NewGame":
+                    menuDefaultCanvas.SetActive(false);
+                    newGameDialog.SetActive(true);
+                    menuNumber = 7;
+                    break;
+
+                case "Resume":
+                    ResumeGame();
+                    break;
             }
         }
         #endregion
@@ -168,8 +175,6 @@ namespace SpeedTutorMainMenuSystem
         public void VolumeApply()
         {
             PlayerPrefs.SetFloat("masterVolume", AudioListener.volume);
-            Debug.Log(PlayerPrefs.GetFloat("masterVolume"));
-            StartCoroutine(ConfirmationBox());
         }
 
         public void BrightnessSlider(float brightness)
@@ -181,8 +186,6 @@ namespace SpeedTutorMainMenuSystem
         public void BrightnessApply()
         {
             PlayerPrefs.SetFloat("masterBrightness", brightnessEffect.brightness);
-            Debug.Log(PlayerPrefs.GetFloat("masterBrightness"));
-            StartCoroutine(ConfirmationBox());
         }
 
         public void ControllerSen()
@@ -196,19 +199,14 @@ namespace SpeedTutorMainMenuSystem
             if (invertYToggle.isOn) //Invert Y ON
             {
                 PlayerPrefs.SetInt("masterInvertY", 1);
-                Debug.Log("Invert" + " " + PlayerPrefs.GetInt("masterInvertY"));
             }
 
             else if (!invertYToggle.isOn) //Invert Y OFF
             {
                 PlayerPrefs.SetInt("masterInvertY", 0);
-                Debug.Log(PlayerPrefs.GetInt("masterInvertY"));
             }
 
             PlayerPrefs.SetFloat("masterSen", controlSenFloat);
-            Debug.Log("Sensitivity" + " " + PlayerPrefs.GetFloat("masterSen"));
-
-            StartCoroutine(ConfirmationBox());
         }
 
         #region ResetButton
@@ -263,7 +261,6 @@ namespace SpeedTutorMainMenuSystem
             {
                 if (PlayerPrefs.HasKey("SavedLevel"))
                 {
-                    Debug.Log("I WANT TO LOAD THE SAVED GAME");
                     //LOAD LAST SAVED SCENE
                     levelToLoad = PlayerPrefs.GetString("SavedLevel");
                     SceneManager.LoadScene(levelToLoad);
@@ -271,7 +268,6 @@ namespace SpeedTutorMainMenuSystem
 
                 else
                 {
-                    Debug.Log("Load Game Dialog");
                     menuDefaultCanvas.SetActive(false);
                     loadGameDialog.SetActive(false);
                     noSaveDialog.SetActive(true);
@@ -328,6 +324,19 @@ namespace SpeedTutorMainMenuSystem
         public void ClickNoSaveDialog()
         {
             GoBackToMainMenu();
+        }
+
+        private void ResumeGame()
+        {
+            FindObjectOfType<WeaponSwitcher>().enabled = true;
+            Time.timeScale = 1;
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+
+            if (GetComponent<Canvas>() != null)
+            {
+                GetComponent<Canvas>().enabled = false;
+            }
         }
         #endregion
     }
