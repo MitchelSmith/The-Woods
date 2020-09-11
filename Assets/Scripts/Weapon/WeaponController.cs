@@ -59,7 +59,10 @@ public class WeaponController : MonoBehaviour
         }
         else if (Input.GetButtonDown("Reload"))
         {
-            if (hasAmmo && ammoSlot.GetCurrentRoundsInMagazine(ammoType) < ammoSlot.GetMaxRoundsInMagazine(ammoType))
+            bool magazineRoundsEqualsTotalRounds = ammoSlot.GetCurrentRoundsInMagazine(ammoType) == ammoSlot.GetCurrentAmmo(ammoType);
+            bool roundsInMagazineLessThanMax = ammoSlot.GetCurrentRoundsInMagazine(ammoType) < ammoSlot.GetMaxRoundsInMagazine(ammoType);
+
+            if (hasAmmo && !magazineRoundsEqualsTotalRounds && roundsInMagazineLessThanMax)
             {
                 ReloadWeapon();
             }
@@ -78,7 +81,7 @@ public class WeaponController : MonoBehaviour
 
     private void ReloadWeapon()
     {
-        // TODO: Add reload animation
+        animator.SetTrigger("Reload");
         reloadAudio.Play();
         ammoSlot.ReloadWeapon(ammoType);
     }
