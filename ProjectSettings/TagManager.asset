@@ -9,6 +9,7 @@ TagManager:
   - Flashlight
   - Radio
   - Weapon
+  - Zombie
   layers:
   - Default
   - TransparentFX

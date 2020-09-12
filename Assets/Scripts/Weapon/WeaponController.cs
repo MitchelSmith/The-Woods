@@ -9,7 +9,10 @@ public class WeaponController : MonoBehaviour
     [Header("Weapon Parameters")]
     [Tooltip("Meters")] [SerializeField] float range = 100f;
     [SerializeField] float damage = 10f;
-    [SerializeField] GameObject hitEffect = null;
+    [SerializeField] GameObject generalHitEffect = null;
+    [SerializeField] GameObject groundHitEffect = null;
+    [SerializeField] GameObject woodHitEffect = null;
+    [SerializeField] GameObject bodyHitEffect = null;
     [SerializeField] Ammo ammoSlot = null;
     [SerializeField] AmmoType ammoType = default;
 
@@ -100,7 +103,25 @@ public class WeaponController : MonoBehaviour
 
     private void CreateHitImpact(RaycastHit hit)
     {
-        GameObject impact = Instantiate(hitEffect, hit.point, Quaternion.LookRotation(hit.normal));
+        GameObject impact = null;
+
+        switch (hit.transform.tag)
+        {
+            case "Zombie":
+                impact = Instantiate(bodyHitEffect, hit.point, Quaternion.LookRotation(hit.normal));
+                break;
+            case "Tree":
+                // TODO: Must replace all trees so they aren't part of the terrain
+                impact = Instantiate(woodHitEffect, hit.point, Quaternion.LookRotation(hit.normal));
+                break;
+            case "Ground":
+                impact = Instantiate(groundHitEffect, hit.point, Quaternion.LookRotation(hit.normal));
+                break;
+            default:
+                impact = Instantiate(generalHitEffect, hit.point, Quaternion.LookRotation(hit.normal));
+                break;
+        }
+
         Destroy(impact, 1f);
     }
 

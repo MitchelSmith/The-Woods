@@ -82,13 +82,18 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public MouseLook mouseLook = new MouseLook();
         public AdvancedSettings advancedSettings = new AdvancedSettings();
 
+        [SerializeField] private float stepInterval = 0;
+        [SerializeField] private AudioClip[] footStepSounds = null;
+        [SerializeField] private AudioClip jumpSound = null;
+        [SerializeField] private AudioClip landSound = null;
 
         private Rigidbody m_RigidBody;
         private CapsuleCollider m_Capsule;
         private float m_YRotation;
         private Vector3 m_GroundContactNormal;
         private bool m_Jump, m_PreviouslyGrounded, m_Jumping, m_IsGrounded;
-
+        private float stepCycle;
+        private float nextStep;
 
         public Vector3 Velocity
         {
@@ -123,6 +128,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_RigidBody = GetComponent<Rigidbody>();
             m_Capsule = GetComponent<CapsuleCollider>();
             mouseLook.Init (transform, cam.transform);
+            stepCycle = 0f;
+            nextStep = stepCycle / 2f;
         }
 
 
@@ -184,6 +191,8 @@ namespace UnityStandardAssets.Characters.FirstPerson
                 }
             }
             m_Jump = false;
+
+            ProgressStepCycle(movementSettings.CurrentTargetSpeed);
         }
 
 
@@ -206,6 +215,59 @@ namespace UnityStandardAssets.Characters.FirstPerson
                     m_RigidBody.velocity = Vector3.ProjectOnPlane(m_RigidBody.velocity, hitInfo.normal);
                 }
             }
+        }
+
+        private void ProgressStepCycle(float speed)
+        {
+            Vector2 input = GetInput();
+
+            if (m_RigidBody.velocity.sqrMagnitude > 0 && (input.x != 0 || input.y != 0))
+            {
+                stepCycle += (m_RigidBody.velocity.magnitude + (speed * (Running ? 2f : 1f))) *
+                             Time.fixedDeltaTime;
+            }
+
+            if (!(stepCycle > nextStep))
+            {
+                return;
+            }
+
+            nextStep = stepCycle + stepInterval;
+
+            PlayFootStepAudio();
+        }
+
+        private void PlayJumpSound()
+        {
+            AudioSource audio = GetComponent<AudioSource>();
+            audio.clip = jumpSound;
+            audio.Play();
+        }
+
+        private void PlayLandingSound()
+        {
+            AudioSource audio = GetComponent<AudioSource>();
+            audio.clip = landSound;
+            audio.Play();
+            nextStep = stepCycle + .5f;
+        }
+
+        private void PlayFootStepAudio()
+        {
+            AudioSource audio = GetComponent<AudioSource>();
+
+            if (!m_IsGrounded)
+            {
+                return;
+            }
+            // pick & play a random footstep sound from the array,
+            // excluding sound at index 0
+            int n = UnityEngine.Random.Range(1, footStepSounds.Length);
+            audio.clip = footStepSounds[n];
+            audio.PlayOneShot(audio.clip);
+            // move picked sound to index 0 so it's not picked next time
+            footStepSounds[n] = footStepSounds[0];
+            footStepSounds[0] = audio.clip;
         }
 
 
@@ -258,6 +320,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             }
             if (!m_PreviouslyGrounded && m_IsGrounded && m_Jumping)
             {
+                PlayJumpSound();
                 m_Jumping = false;
             }
         }
