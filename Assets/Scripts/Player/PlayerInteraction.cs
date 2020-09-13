@@ -3,18 +3,32 @@ using UnityEngine.UI;
 
 public class PlayerInteraction : MonoBehaviour
 {
+    [Header("General")]
     [Tooltip("First Person Camera")] [SerializeField] Camera FPCamera = null;
     [Tooltip("Meters")] [SerializeField] float range = 1f;
 
+    [Header("Icons")]
     [SerializeField] Image pickupIcon = null;
     [SerializeField] Image noteIcon = null;
     [SerializeField] Image generalIcon = null;
 
+    [Header("Audio")]
+    [SerializeField] AudioSource audioSource = null;
+    [SerializeField] AudioClip turnOff = null;
+    [SerializeField] AudioClip pickupObject = null;
+    [SerializeField] AudioClip pickupPistol = null;
+    [SerializeField] AudioClip pickupAmmo = null;
+    [SerializeField] AudioClip[] pickupTotem = null;
+
     private int layerMask = 0;
+    private InventoryManager inventoryManager = null;
 
     void Start()
     {
         layerMask = LayerMask.GetMask("InteractableObject");
+
+        audioSource = GetComponent<AudioSource>();
+        inventoryManager = GetComponent<InventoryManager>();
 
         pickupIcon.enabled = false;
         noteIcon.enabled = false;
@@ -47,6 +61,7 @@ public class PlayerInteraction : MonoBehaviour
             case "Ammo":
             case "Flashlight":
             case "Weapon":
+            case "PortalTotem":
                 InteractWithCollectableObject(hit);
                 break;
             case "Radio":
@@ -85,6 +100,9 @@ public class PlayerInteraction : MonoBehaviour
                 case "Weapon":
                     InteractWithWeapon(hit);
                     break;
+                case "PortalTotem":
+                    InteractWithPortalTotem(hit);
+                    break;
             }
         }
     }
@@ -93,6 +111,7 @@ public class PlayerInteraction : MonoBehaviour
     {
         AmmoPickup ammo = hit.transform.GetComponent<AmmoPickup>();
         FindObjectOfType<Ammo>().IncreaseCurrentAmmo(ammo.type, ammo.amount);
+        audioSource.PlayOneShot(pickupAmmo);
         Destroy(ammo.gameObject);
     }
 
@@ -101,12 +120,15 @@ public class PlayerInteraction : MonoBehaviour
         GameObject flashlight = hit.transform.gameObject;
         FlashlightSystem flashlightSystem = transform.GetComponent<FlashlightSystem>();
         flashlightSystem.PickupFlashlight();
+        audioSource.PlayOneShot(pickupObject);
+
         Destroy(flashlight);
     }
 
     private void InteractWithWeapon(RaycastHit hit)
     {
         GameObject weapon = hit.transform.gameObject;
+        audioSource.PlayOneShot(pickupPistol);
         GetComponentInChildren<WeaponSwitcher>().hasPistol = true;
         Destroy(weapon);
     }
@@ -135,7 +157,20 @@ public class PlayerInteraction : MonoBehaviour
     private void InteractWithRadio(RaycastHit hit)
     {
         GameObject radio = hit.transform.gameObject;
+        audioSource.PlayOneShot(turnOff);
         AudioSource audio = radio.GetComponent<AudioSource>();
         audio.mute = !audio.mute;
+    }
+
+    private void InteractWithPortalTotem(RaycastHit hit)
+    {
+        inventoryManager.PickupCollectable(hit);
+
+        int totemCount = inventoryManager.GetCountOfCollectable(hit);
+
+        // Play different sound for amount of totems collected
+        audioSource.PlayOneShot(pickupTotem[totemCount - 1]);
+
+        Destroy(hit.transform.gameObject);
     }
 }

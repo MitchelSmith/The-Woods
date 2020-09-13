@@ -82,6 +82,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         public MouseLook mouseLook = new MouseLook();
         public AdvancedSettings advancedSettings = new AdvancedSettings();
 
+        [SerializeField] private AudioSource audioSource = null;
         [SerializeField] private float stepInterval = 0;
         [SerializeField] private AudioClip[] footStepSounds = null;
         [SerializeField] private AudioClip jumpSound = null;
@@ -223,7 +224,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
             if (m_RigidBody.velocity.sqrMagnitude > 0 && (input.x != 0 || input.y != 0))
             {
-                stepCycle += (m_RigidBody.velocity.magnitude + (speed * (Running ? 2f : 1f))) *
+                stepCycle += (m_RigidBody.velocity.magnitude + (speed * (Running ? 1.5f : 1f))) *
                              Time.fixedDeltaTime;
             }
 
@@ -239,23 +240,19 @@ namespace UnityStandardAssets.Characters.FirstPerson
 
         private void PlayJumpSound()
         {
-            AudioSource audio = GetComponent<AudioSource>();
-            audio.clip = jumpSound;
-            audio.Play();
+            audioSource.clip = jumpSound;
+            audioSource.Play();
         }
 
         private void PlayLandingSound()
         {
-            AudioSource audio = GetComponent<AudioSource>();
-            audio.clip = landSound;
-            audio.Play();
+            audioSource.clip = landSound;
+            audioSource.Play();
             nextStep = stepCycle + .5f;
         }
 
         private void PlayFootStepAudio()
         {
-            AudioSource audio = GetComponent<AudioSource>();
-
             if (!m_IsGrounded)
             {
                 return;
@@ -263,11 +260,11 @@ namespace UnityStandardAssets.Characters.FirstPerson
             // pick & play a random footstep sound from the array,
             // excluding sound at index 0
             int n = UnityEngine.Random.Range(1, footStepSounds.Length);
-            audio.clip = footStepSounds[n];
-            audio.PlayOneShot(audio.clip);
+            audioSource.clip = footStepSounds[n];
+            audioSource.PlayOneShot(audioSource.clip);
             // move picked sound to index 0 so it's not picked next time
             footStepSounds[n] = footStepSounds[0];
-            footStepSounds[0] = audio.clip;
+            footStepSounds[0] = audioSource.clip;
         }
 
 
